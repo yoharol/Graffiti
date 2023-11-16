@@ -14,13 +14,20 @@ public class PlayerController : MonoBehaviour
     public bool running=false;
 
     private Vector3 _direction;
+    public bool borning = false;
+
+    public void setBorn()
+    {
+        borning = true;
+        playerAnimator.Play("neko_born");
+    }
     
     
 
     // Start is called before the first frame update
     void Start()
     {
-        playerAnimator.Play("neko_idle");
+        // playerAnimator.Play("neko_idle");
         playerShadowAnimator.Play("neko_shadow");
         running = false;
     }
@@ -28,6 +35,8 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(borning)
+            return;
         // control playerTransform with wasd
         Vector3 move = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
         if (move.magnitude > 0)
