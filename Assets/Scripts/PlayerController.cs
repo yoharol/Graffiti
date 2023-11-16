@@ -13,16 +13,16 @@ public class PlayerController : MonoBehaviour
     public Animator playerShadowAnimator;
     public bool running=false;
 
-    private Vector3 _direction;
+    private Vector2 _direction;
+    private Rigidbody2D _rigidbody2D;
     public bool borning = false;
 
     public void setBorn()
     {
         borning = true;
         playerAnimator.Play("neko_born");
+        _rigidbody2D = gameObject.GetComponent<Rigidbody2D>();
     }
-    
-    
 
     // Start is called before the first frame update
     void Start()
@@ -38,10 +38,12 @@ public class PlayerController : MonoBehaviour
         if(borning)
             return;
         // control playerTransform with wasd
-        Vector3 move = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
+        Vector2 move = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         if (move.magnitude > 0)
             _direction = move.normalized;
-        playerTransform.position += speed * Time.deltaTime * move;
+        Vector2 target = _rigidbody2D.position + speed * Time.deltaTime * (Vector2)move;
+        // _rigidbody2D.MovePosition(target);
+        _rigidbody2D.AddForce(move * 1.0f);
 
         if (_direction.x < 0)
             playerTransform.localScale = new Vector3(-1, 1, 1);
