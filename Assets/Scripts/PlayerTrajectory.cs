@@ -10,7 +10,8 @@ public class PlayerTrajectory : MonoBehaviour
     public int offset = 20;
     public int brushSize = 2;
 
-    public int arraySize = 5;
+    public int arraySizeX = 12;
+    public int arraySizeY = 6;
     public GameObject TrajPrefab;
     public Material TrajMaterial;
     private GameObject[,] TrajList;
@@ -32,11 +33,11 @@ public class PlayerTrajectory : MonoBehaviour
 
     void drawOnTexture()
     {
-        float x = playerTrans.position.x;
-        float y = playerTrans.position.y;
-        int i = Mathf.RoundToInt(x / 10.0f) + arraySize / 2;
-        int j = Mathf.RoundToInt(y / 10.0f) + arraySize / 2;
-        if (i < 0 || i >= arraySize || j < 0 || j >= arraySize)
+        float x = playerTrans.position.x - transform.position.x;
+        float y = playerTrans.position.y - transform.position.y;
+        int i = Mathf.RoundToInt(x / 10.0f) + arraySizeX / 2;
+        int j = Mathf.RoundToInt(y / 10.0f) + arraySizeY / 2;
+        if (i < 0 || i >= arraySizeX || j < 0 || j >= arraySizeY)
             return;
         int offx = (int)(((x + 5.0f) % 10.0f)/10.0f * (1000 / offset)); 
         int offy = (int)(((y + 5.0f) % 10.0f)/10.0f * (1000 / offset)); 
@@ -44,23 +45,24 @@ public class PlayerTrajectory : MonoBehaviour
             for (int by = -brushSize/2; by < brushSize/2; by++)
                 TexList[i,j].SetPixel(offx+bx, offy+by, brushColor);
         TexList[i,j].Apply();
-
     }
     
     // Start is called before the first frame update
     void Start()
     {
         // generate arraySize x arraySize array of TrajPrefab
-        TrajList = new GameObject[arraySize, arraySize];
-        MatList = new Material[arraySize,arraySize];
-        TexList = new Texture2D[arraySize, arraySize];
+        TrajList = new GameObject[arraySizeX, arraySizeY];
+        MatList = new Material[arraySizeX,arraySizeY];
+        TexList = new Texture2D[arraySizeX, arraySizeY];
+        
+        Vector3 pos = transform.position;
 
-        for (int i = 0; i < arraySize; i++)
+        for (int i = 0; i < arraySizeX; i++)
         {
-            for (int j = 0; j < arraySize; j++)
+            for (int j = 0; j < arraySizeY; j++)
             {
-                float posx = (i - arraySize / 2) * 10.0f;
-                float posy = (j - arraySize / 2) * 10.0f;
+                float posx = pos.x + (i - arraySizeX / 2) * 10.0f;
+                float posy = pos.y + (j - arraySizeY / 2) * 10.0f;
                 TrajList[i, j] = Instantiate(TrajPrefab, new Vector3(posx, posy, 0.0f), quaternion.identity);
                 TrajList[i, j].transform.parent = transform;
                 TrajList[i, j].GetComponent<MeshRenderer>().material = new Material(TrajMaterial);

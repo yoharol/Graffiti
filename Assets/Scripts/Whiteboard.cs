@@ -7,6 +7,7 @@ using UnityEngine;
 public class WhiteBoard : MonoBehaviour
 {
     public GameObject canvas;
+    public GameObject preset;
     public MeshRenderer meshRenderer;
     public Material material;
     public Texture2D texture;
@@ -14,6 +15,7 @@ public class WhiteBoard : MonoBehaviour
 
     public PolygonCollider2D boardCollider;
     public bool painting = false;
+    public bool finished = false;
     public int radius = 8;
     int offset = 8;
     public Color paintColor;
@@ -40,12 +42,22 @@ public class WhiteBoard : MonoBehaviour
         texture.Apply();
     }
 
+    public IEnumerator StartPaintingIE()
+    {
+        GameManager.instance.playerController.enabled = false;
+        canvas.SetActive(true);
+        yield return new WaitForSeconds(1.0f);
+        preset.SetActive(true);
+        StartPainting();
+    }
+
     public void StartPainting()
     {
+        painting = true;
         canvas.SetActive(true);
+        GameManager.instance.palette.gameObject.SetActive(true);
         texture = new Texture2D(1280, 720, TextureFormat.RGBA32, false);
         init_texture2d();
-        painting = true;
         material.mainTexture = texture;
         meshRenderer.enabled = true;
         overlayCanvas.SetActive(true);
@@ -104,6 +116,7 @@ public class WhiteBoard : MonoBehaviour
     public void FinishPainting()
     {
         canvas.SetActive(false);
+        GameManager.instance.palette.gameObject.SetActive(false);
         painting = false;
         meshRenderer.enabled = false;
 
@@ -205,14 +218,16 @@ public class WhiteBoard : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        /*if (Input.GetKeyDown(KeyCode.Q))
+        {
+            StartCoroutine(StartPaintingIE());
+        }*/
+
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            StartPainting();
-        }
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
             FinishPainting();
+            finished = true;
+            GameManager.instance.playerController.enabled = true;
         }
 
         if (painting)

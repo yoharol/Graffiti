@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class MainSceneFlow : MonoBehaviour
 {
+    public triggerButton button;
     
     IEnumerator setPlayerBorn()
     {
@@ -24,17 +25,21 @@ public class MainSceneFlow : MonoBehaviour
                 targetPos, ref vel, 0.3f);
             yield return new WaitForSeconds(Time.deltaTime);
         }
+        // button.gameObject.SetActive(true);
         GameManager.instance.playerController.playerAnimator.gameObject.SetActive(true);
         GameManager.instance.playerController.playerShadowAnimator.gameObject.SetActive(true);
         GameManager.instance.playerController.enabled = true;
         GameManager.instance.playerController.borning = false;
         GameManager.instance.virtualCamera.enabled = true;
+        GameManager.instance.playerTrajectory.gameObject.SetActive(true);
     }
     
     // Start is called before the first frame update
     void Start()
     {
+        GameManager.instance.maskLoader.setSize(0.0f);
         GameManager.instance.playerTrajectory.gameObject.SetActive(false);
+        GameManager.instance.curtain.gameObject.SetActive(true);
         GameManager.instance.curtain.setFadeIn(2.0f);
         GameManager.instance.playerController.enabled = false;
         StartCoroutine(setPlayerBorn());

@@ -13,11 +13,17 @@ public class GameManager : MonoBehaviour
     public PlayerController playerController;
     public PlayerTrajectory playerTrajectory;
     public CinemachineBrain virtualCamera;
+    public MaskLoader maskLoader;
+    public WhiteBoard whiteBoard;
+    public DialogueHandler dialogueHandler;
+    public PaletteController palette;
     
     public Camera[] cameras;
 
     private void Awake()
     {
+        //set resolution
+        Screen.SetResolution(1280, 720, false);
         instance = this;
         foreach (var camera in cameras)
         {

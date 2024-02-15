@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -8,6 +9,8 @@ public class PlayerController : MonoBehaviour
     public Transform playerTransform;
     public Transform playerAnimTransform;
     public Transform[] playerAnimTransList;
+    public Transform playerBody;
+    public GameObject interactBubble;
     
     public Animator playerAnimator;
     public Animator playerShadowAnimator;
@@ -23,6 +26,11 @@ public class PlayerController : MonoBehaviour
         playerAnimator.Play("neko_born");
         _rigidbody2D = gameObject.GetComponent<Rigidbody2D>();
     }
+    
+    public void setInteractBubble(bool active)
+    {
+        interactBubble.SetActive(active);
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -30,6 +38,7 @@ public class PlayerController : MonoBehaviour
         // playerAnimator.Play("neko_idle");
         playerShadowAnimator.Play("neko_shadow");
         running = false;
+        interactBubble.SetActive(false);
     }
 
     // Update is called once per frame
@@ -43,14 +52,15 @@ public class PlayerController : MonoBehaviour
             _direction = move.normalized;
         Vector2 target = _rigidbody2D.position + speed * Time.deltaTime * (Vector2)move;
         // _rigidbody2D.MovePosition(target);
-        _rigidbody2D.AddForce(move * 1.0f);
+        _rigidbody2D.AddForce(move * speed * Time.deltaTime * 100.0f);
 
         if (_direction.x < 0)
-            playerTransform.localScale = new Vector3(-1, 1, 1);
+            playerBody.localScale = new Vector3(-1, 1, 1);
         else if (_direction.x > 0)
-            playerTransform.localScale = Vector3.one;
+            playerBody.localScale = Vector3.one;
         if (move.magnitude < 0.5f)
         {
+            playerShadowAnimator.gameObject.SetActive(true);
             running = false;
             playerAnimator.gameObject.SetActive(true);
             if (_direction.y > 0)
