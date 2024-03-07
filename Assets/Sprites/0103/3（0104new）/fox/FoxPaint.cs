@@ -10,17 +10,23 @@ public class FoxPaint : MonoBehaviour{
     public SpriteRenderer presetSprite;
     public SpriteRenderer face;
     public float localX;
+
+    bool painted = false;
+
+    private PaintTarget paintTarget;
     
     IEnumerator startPainting()
     {
-        GameManager.instance.playerController.enabled = false;
-        yield return new WaitForSeconds(2.0f);
-        StartCoroutine(GameManager.instance.whiteBoard.StartPaintingIE());
+        // GameManager.instance.playerController.enabled = false;
+        // yield return new WaitForSeconds(2.0f);
+        painted = true;
+        StartCoroutine(GameManager.instance.whiteBoard.StartPaintingIE(paintTarget));
         yield return new WaitForSeconds(0.5f);
     }
 
     private void Start()
     {
+        paintTarget = gameObject.GetComponent<PaintTarget>();
         boardSticker = face;
     }
 
@@ -47,7 +53,12 @@ public class FoxPaint : MonoBehaviour{
     {
         if (col.tag == "Player")
         {
-            triggered = true;
+            if (! triggered && !painted)
+            {
+
+                GameManager.instance.playerController.setInteractBubble(true);
+            }
+            triggered = true;   
         }
     }
     
@@ -56,6 +67,7 @@ public class FoxPaint : MonoBehaviour{
         if (col.tag == "Player")
         {
             triggered = false;
+            GameManager.instance.playerController.setInteractBubble(false);
         }
     }
     

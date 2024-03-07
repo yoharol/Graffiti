@@ -11,6 +11,7 @@ public class Guider : MonoBehaviour
     public Animator dialogueAnimator;
     public LoadButton loadButton;
     public bool triggered = false;
+    public BoxCollider2D click_region;
     private int state = 1;
 
     public void setFace2()
@@ -29,19 +30,25 @@ public class Guider : MonoBehaviour
 
     private void Update()
     {
-        if (triggered && Input.GetKeyDown(KeyCode.E))
+        if (triggered && Input.GetMouseButtonDown(0))
         {
-            state += 1;
-            if (state == 2)
+            Vector2 clickPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Bounds bounds = click_region.bounds;
+            bounds.center= new Vector3(bounds.center.x, bounds.center.y, 0.0f);
+            if (bounds.Contains(clickPosition))
             {
-                setFace2();
-            }
+                state += 1;
+                if (state == 2)
+                {
+                    setFace2();
+                }
 
-            if (state == 3)
-            {
-                setFace3();
-                GetComponent<BoxCollider2D>().enabled = false;
-                loadButton.playDisappearAnimation();
+                if (state == 3)
+                {
+                    setFace3();
+                    GetComponent<BoxCollider2D>().enabled = false;
+                    loadButton.playDisappearAnimation();
+                }
             }
         }
     }

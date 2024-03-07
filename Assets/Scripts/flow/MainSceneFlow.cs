@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,12 +20,15 @@ public class MainSceneFlow : MonoBehaviour
         Vector3 vel = Vector3.zero;
         Vector3 targetPos = GameManager.instance.playerController.transform.position;
         targetPos.z = Camera.main.transform.position.z;
-        for (float t = 0; t < 1.5f; t+=Time.deltaTime)
+        Camera.main.transform.DOMove(targetPos, 1.5f);
+        yield return new WaitForSeconds(1.5f);
+        CameraManager.instance.followPlayer = true;
+        /*for (float t = 0; t < 1.5f; t+=Time.deltaTime)
         {
             Camera.main.transform.position = Vector3.SmoothDamp(Camera.main.transform.position,
                 targetPos, ref vel, 0.3f);
             yield return new WaitForSeconds(Time.deltaTime);
-        }
+        }*/
         // button.gameObject.SetActive(true);
         GameManager.instance.playerController.playerAnimator.gameObject.SetActive(true);
         GameManager.instance.playerController.playerShadowAnimator.gameObject.SetActive(true);

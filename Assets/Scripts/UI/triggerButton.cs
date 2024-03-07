@@ -13,6 +13,10 @@ public class triggerButton : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Vector3 pos = sticker.transform.position;
+        sticker = Instantiate(GameManager.instance.playerIcon);
+        sticker.SetActive(false);
+        sticker.transform.position = pos;
         loadButton = GetComponent<LoadButton>();
     }
 
@@ -22,7 +26,6 @@ public class triggerButton : MonoBehaviour
         // if E is pressed and the player is in the trigger area
         if (Input.GetKeyDown(KeyCode.E) && triggered)
         {
-            // load the next scene
             GameManager.instance.maskLoader.setBigSize();
             loadButton.playDisappearAnimation();
             triggered = false;

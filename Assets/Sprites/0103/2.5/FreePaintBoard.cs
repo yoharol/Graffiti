@@ -11,6 +11,7 @@ public class FreePaintBoard : MonoBehaviour
     private SpriteRenderer boardSticker;
     private bool firstPainted;
     private bool bubbleTriggered;
+    private PaintTarget paintTarget;
     
     IEnumerator startPainting()
     {
@@ -18,12 +19,13 @@ public class FreePaintBoard : MonoBehaviour
         GameManager.instance.playerController.setInteractBubble(false);
         GameManager.instance.playerController.enabled = false;
         yield return new WaitForSeconds(0.5f);
-        StartCoroutine(GameManager.instance.whiteBoard.StartPaintingIE());
+        StartCoroutine(GameManager.instance.whiteBoard.StartPaintingIE(paintTarget));
         yield return new WaitForSeconds(0.5f);
     }
 
     private void Start()
     {
+        paintTarget = gameObject.GetComponent<PaintTarget>();
         boardSticker = transform.Find("PaintBoard").GetComponent<SpriteRenderer>();
     }
 

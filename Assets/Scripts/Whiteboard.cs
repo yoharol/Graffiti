@@ -22,12 +22,12 @@ public class WhiteBoard : MonoBehaviour
 
     public RenderTexture renderTexture;
     public SpriteRenderer targetSpriteRenderer;
+    public PaintTarget paintTarget;
 
     public Color[] palette;
 
     private Vector2 _prevDraw = Vector2.zero;
-
-
+    private float start_paint_time;
 
     void init_texture2d()
     {
@@ -42,31 +42,55 @@ public class WhiteBoard : MonoBehaviour
         texture.Apply();
     }
 
-    public IEnumerator StartPaintingIE()
+    public IEnumerator StartPaintingIE(PaintTarget target)
     {
+        start_paint_time = Time.time;
+        finished = false;   
+        GameManager.instance.whiteBoardMode = false;
+        GameManager.instance.playerController.enabled = false;
+        paintTarget = target;
+        // GameManager.instance.playerController.gameObject.SetActive(false);
+        float cameraMoveTime = 1.0f;
+        CameraManager.instance.SetCameraToFraction(target.paintLookTarget.transform.position, target.camerafraction, cameraMoveTime, false);
+        
+        // ===================================================
+        // canvas.SetActive(true);
+        yield return new WaitForSeconds(cameraMoveTime);
+        // preset.SetActive(true);
+        StartPainting();
+    }
+
+    public IEnumerator StartWhiteBoardIE()
+    {
+        start_paint_time = Time.time;
+        finished = false;
+        GameManager.instance.whiteBoardMode = true;
         GameManager.instance.playerController.enabled = false;
         canvas.SetActive(true);
-        yield return new WaitForSeconds(1.0f);
         preset.SetActive(true);
+        painting = true;
+        GameManager.instance.palette.gameObject.SetActive(true);
+        texture = new Texture2D(1280, 720, TextureFormat.RGBA32, false);
+        init_texture2d();
+        material.mainTexture = texture;
+        meshRenderer.enabled = true;
+        yield return new WaitForSeconds(0.2f);
         StartPainting();
     }
 
     public void StartPainting()
     {
         painting = true;
-        canvas.SetActive(true);
+        overlayCanvas.SetActive(true);
         GameManager.instance.palette.gameObject.SetActive(true);
         texture = new Texture2D(1280, 720, TextureFormat.RGBA32, false);
         init_texture2d();
         material.mainTexture = texture;
         meshRenderer.enabled = true;
-        overlayCanvas.SetActive(true);
     }
 
     void FillBackground(Color[] pixelArray, int width, int height)
-    {
-        
-        
+    {   
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
         queue.Enqueue(Vector2Int.zero);
 
@@ -118,7 +142,29 @@ public class WhiteBoard : MonoBehaviour
         canvas.SetActive(false);
         GameManager.instance.palette.gameObject.SetActive(false);
         painting = false;
+
+        GameObject clonedMesh = Instantiate(meshRenderer.gameObject);
+        clonedMesh.transform.position = meshRenderer.transform.position;
+        clonedMesh.transform.position = new Vector3(clonedMesh.transform.position.x, clonedMesh.transform.position.y, 0.0f);
+        clonedMesh.layer = 6;
+
+        Vector3 scale = clonedMesh.transform.localScale;
+        clonedMesh.transform.localScale = scale * paintTarget.camerafraction;
+        paintTarget.meshRenderer = clonedMesh.GetComponent<MeshRenderer>();
+        paintTarget.meshRenderer.material = new Material(material);
+        paintTarget.texture = new Texture2D(1280, 720, TextureFormat.RGBA32, false);
+        Graphics.CopyTexture(material.mainTexture, paintTarget.texture);
+        paintTarget.meshRenderer.material.mainTexture = paintTarget.texture;
+
         meshRenderer.enabled = false;
+    }
+
+    public void FinishWhiteBoard()
+    {
+        canvas.SetActive(false);
+        GameManager.instance.palette.gameObject.SetActive(false);
+        painting = false;
+        // clonedMesh.transform.parent = paintTarget.transform;
 
         int width = renderTexture.width;
         int height = renderTexture.height;
@@ -139,16 +185,32 @@ public class WhiteBoard : MonoBehaviour
                 pixelArrayResized[indexResized] = pixelArray[index];
             }
         }
-        
+        FillBackground(pixelArray, renderTexture.width, renderTexture.height);
         FillBackground(pixelArrayResized, renderTexture.width / 4, renderTexture.height / 4);
+
         Texture2D textureResized = new Texture2D(renderTexture.width / 4, renderTexture.height / 4, TextureFormat.RGBA32, false);
         textureResized.SetPixels(pixelArrayResized);
         textureResized.filterMode = FilterMode.Point;
         textureResized.Apply();
 
         targetSpriteRenderer.sprite = Sprite.Create(textureResized, new Rect(0, 0, textureResized.width, textureResized.height), new Vector2(0.5f, 0.5f));
+
         overlayCanvas.SetActive(false);
         Destroy(newTexture);
+    }
+
+    void CreateSpriteFromTexture(Color[] pixelArray, int width, int height)
+    {
+        // create a new gameobject with sprite target
+        GameObject gameObject = new GameObject();
+        gameObject.transform.position = Camera.main.transform.position;
+        SpriteRenderer sprite = gameObject.AddComponent<SpriteRenderer>();
+        Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        texture.SetPixels(pixelArray);
+        texture.filterMode = FilterMode.Point;
+        texture.Apply();
+        sprite.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        Destroy(texture);
     }
 
     void DrawPixel(int x, int y, int size, Color color)
@@ -174,6 +236,7 @@ public class WhiteBoard : MonoBehaviour
 
     void Painting()
     {
+        UnityEngine.Debug.Log("Painting");
         if (Input.GetMouseButton(0))
         {
             // print mouse position
@@ -223,10 +286,17 @@ public class WhiteBoard : MonoBehaviour
             StartCoroutine(StartPaintingIE());
         }*/
 
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (painting && Input.GetKeyDown(KeyCode.E))
         {
-            FinishPainting();
+            if(Time.time - start_paint_time < 0.5f)
+                return;
+            if (GameManager.instance.whiteBoardMode)
+                FinishWhiteBoard();
+            else
+                FinishPainting();
             finished = true;
+            // GameManager.instance.playerController.gameObject.SetActive(true);
+            CameraManager.instance.SetCameraToFollowPlayer(1.0f);
             GameManager.instance.playerController.enabled = true;
         }
 

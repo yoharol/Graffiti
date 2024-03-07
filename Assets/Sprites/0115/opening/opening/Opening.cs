@@ -37,9 +37,13 @@ public class Opening : MonoBehaviour
         {
             objects[index-1].SetActive(false);
             finished = true;
-            // load next scene by scene index + 1
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         }
+    }
+
+    IEnumerator loadScene()
+    {
+        yield return new WaitForSeconds(1f);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
     
     public void startOpening()

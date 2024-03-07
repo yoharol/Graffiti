@@ -20,17 +20,19 @@ public class face : MonoBehaviour
     public GameObject thinking;
     public SpriteRenderer presetFace;
 
+    private PaintTarget paintTarget;
+
     IEnumerator startPainting()
     {
         GameManager.instance.whiteBoard.targetSpriteRenderer = GetComponent<SpriteRenderer>();
         GameManager.instance.whiteBoard.preset.GetComponent<SpriteRenderer>().sprite = presetFace.sprite;
-        GameManager.instance.playerController.enabled = false;
-        thinking.SetActive(true);
-        yield return new WaitForSeconds(0.5f);
-        alreadyFirstPaint = true;
         GameManager.instance.playerController.setInteractBubble(false);
-        StartCoroutine(GameManager.instance.whiteBoard.StartPaintingIE());
+        StartCoroutine(GameManager.instance.whiteBoard.StartWhiteBoardIE());
         yield return new WaitForSeconds(0.5f);
+        thinking.SetActive(true);
+        // GameManager.instance.playerController.enabled = false;
+        alreadyFirstPaint = true;
+        // StartCoroutine(GameManager.instance.whiteBoard.StartPaintingIE(paintTarget));
         faceAnimator.enabled = false;
     }
 
@@ -60,6 +62,7 @@ public class face : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        paintTarget = GetComponent<PaintTarget>();
         faceAnimator = GetComponent<Animator>();
     }
 
